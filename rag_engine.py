@@ -23,7 +23,7 @@ def load_and_index_pdfs(pdf_paths: list[str]):
     splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
     chunks = splitter.split_documents(all_docs)
 
-    embeddings = HuggingFaceEmbeddings(model_name="llama-3.3-70b-versatile")
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vectorstore = FAISS.from_documents(chunks, embeddings)
     return vectorstore
 
@@ -31,7 +31,7 @@ def load_and_index_pdfs(pdf_paths: list[str]):
 def build_qa_chain(vectorstore):
     llm = ChatGroq(
         api_key=os.getenv("GROQ_API_KEY"),
-        model_name="llama3-8b-8192",
+        model_name="llama-3.3-70b-versatile",
         temperature=0.2
     )
 

@@ -30,15 +30,14 @@ async def upload_papers(files: list[UploadFile] = File(...)):
         tmp_paths.append(dest)
 
     vectorstore = load_and_index_pdfs(tmp_paths)
-    chain = build_qa_chain(vectorstore)
+    chain_dict = build_qa_chain(vectorstore)
     session_id = str(uuid.uuid4())
-    sessions[session_id] = {"chain": chain, "files": [f.filename for f in files]}
+    sessions[session_id] = chain_dict
     return {"session_id": session_id, "files": [f.filename for f in files]}
 
 @app.post("/query")
 async def query(session_id: str = Form(...), question: str = Form(...)):
     if session_id not in sessions:
         return JSONResponse(status_code=404, content={"error": "Session not found"})
-    chain = sessions[session_id]["chain"]
-    answer, sources = query_papers(chain, question)
+    answer, sources = query_papers(sessions[session_id], question)
     return {"answer": answer, "sources": sources}
