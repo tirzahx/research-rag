@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+research_rag/
+venv/
+node_modules/
+frontend/node_modules/
