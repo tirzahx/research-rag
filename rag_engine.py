@@ -20,7 +20,7 @@ def load_and_index_pdfs(pdf_paths: list[str]):
             doc.metadata["source"] = os.path.basename(path)
         all_docs.extend(docs)
 
-    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     chunks = splitter.split_documents(all_docs)
 
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -35,12 +35,11 @@ def build_qa_chain(vectorstore):
         temperature=0.2
     )
 
-    prompt = PromptTemplate.from_template("""You are a research assistant helping synthesize findings across multiple academic papers.
-
-Use the context below — drawn from multiple papers — to answer the question.
-Always mention which paper(s) each point comes from using the source name in brackets like [paper.pdf].
-If papers agree, highlight the consensus. If they disagree, explicitly state the disagreement.
-If you don't know, say so — do not hallucinate.
+    prompt = PromptTemplate.from_template("""You are a research assistant. Answer ONLY using the context provided below.
+If the context does not contain enough information to answer the question, say exactly:
+"I could not find sufficient information in the uploaded papers to answer this."
+Do NOT use any outside knowledge. Do NOT make up citations.
+Always attribute every claim to a specific paper using [filename] brackets.
 
 Context:
 {context}
@@ -50,7 +49,7 @@ Question:
 
 Answer:""")
 
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 6})
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
 
     def format_docs(docs):
         return "\n\n".join(

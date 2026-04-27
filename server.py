@@ -40,4 +40,4 @@ async def query(session_id: str = Form(...), question: str = Form(...)):
     if session_id not in sessions:
         return JSONResponse(status_code=404, content={"error": "Session not found"})
     answer, sources = query_papers(sessions[session_id], question)
-    return {"answer": answer, "sources": sources}
+    return {"answer": answer, "sources": sources, "grounded": len(sources) > 0}
